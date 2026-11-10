@@ -11,8 +11,8 @@ id_rsa*
 id_ed25519*
 oci_api_key*
 ~/.oci/
-# Throwaway keys generated for the signer's unit tests; not tied to any account.
-!crates/core/testdata/*.pem
+# Throwaway key for the demo recordings; not tied to any account.
+!assets/demo/*.pem
 
 # ── Logs / runtime output ─────────────────────────────────────────────────────
 *.log
@@ -26,7 +26,6 @@ docs/blog-en.md
 docs/blog-ru-habr.md
 
 # ── AI assistant / editor scratch files ──────────────────────────────────────
-CLAUDE.md
 .claude/
 .cursor/
 .cursorrules

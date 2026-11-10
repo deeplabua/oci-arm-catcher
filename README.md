@@ -318,9 +318,10 @@ running notification daemon (any desktop environment has one).
 
 ## Development & tests
 
-The Rust workspace has two crates: `crates/core` (`oci-arm-catcher-core` — config,
-request signing, API client and the retry loop) and `crates/cli` (the
-`oci-arm-catcher` binary).
+The Rust workspace has two crates: `crates/core` (`oci-arm-catcher-core` — the
+Compute/Identity calls and the retry loop) and `crates/cli` (the `oci-arm-catcher`
+binary). Reading `~/.oci/config`, request signing and the HTTP client live in
+[oci-request-signer](https://github.com/deeplabua/oci-request-signer).
 
 ```bash
 cargo test

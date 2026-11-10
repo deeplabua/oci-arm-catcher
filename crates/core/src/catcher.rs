@@ -2,9 +2,9 @@
 
 use std::time::Duration;
 
-use crate::api::{Instance, LaunchDetails};
-use crate::client::Client;
-use crate::error::{Error, Result};
+use crate::api::{Api as _, Instance, LaunchDetails};
+use oci_request_signer::Client;
+use oci_request_signer::{Error, Result};
 
 /// Why an attempt is worth repeating.
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
@@ -166,7 +166,7 @@ mod tests {
 
     use super::*;
     use crate::api::{A1_FLEX, ShapeConfig, SourceDetails, VnicDetails};
-    use crate::error::ApiError;
+    use oci_request_signer::ApiError;
 
     fn api(status: u16, code: &str, message: &str) -> Error {
         Error::Api(ApiError {

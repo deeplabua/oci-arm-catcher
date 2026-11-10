@@ -6,7 +6,7 @@ use std::time::Duration;
 
 use anyhow::{Context as _, Result, bail};
 use oci_arm_catcher_core::api::{A1_FLEX, ShapeConfig, SourceDetails, VnicDetails};
-use oci_arm_catcher_core::config::expand_home;
+use oci_arm_catcher_core::expand_home;
 use oci_arm_catcher_core::{LaunchDetails, Plan};
 
 use crate::args::{CommonArgs, LaunchArgs};

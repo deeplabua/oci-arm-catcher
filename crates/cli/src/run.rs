@@ -3,8 +3,8 @@
 use std::time::Duration;
 
 use anyhow::Result;
-use oci_arm_catcher_core::config::{DEFAULT_PROFILE, Profile};
-use oci_arm_catcher_core::{A1_FLEX, Client, Error, catcher};
+use oci_arm_catcher_core::{A1_FLEX, Api as _, Client, Error, catcher};
+use oci_arm_catcher_core::{DEFAULT_PROFILE, Profile};
 
 use crate::args::{Args, Command, CommonArgs, DiscoverArgs, LaunchArgs};
 use crate::exit::UsageError;
@@ -30,7 +30,7 @@ fn client(common: &CommonArgs) -> Result<Client> {
             .ok_or_else(|| UsageError::new("cannot find your home directory; pass --oci-config"))?,
     };
     let profile = Profile::load(&path, &common.profile).map_err(usage_if_local)?;
-    Client::new(&profile).map_err(usage_if_local)
+    oci_arm_catcher_core::connect(&profile).map_err(usage_if_local)
 }
 
 /// A broken config file or key is the user's to fix, like a bad flag.
@@ -243,7 +243,7 @@ fn discover(args: &DiscoverArgs, common: &CommonArgs, env_file: &EnvFile) -> Res
     }
 
     for key in ["id_ed25519.pub", "id_rsa.pub"] {
-        let path = oci_arm_catcher_core::config::expand_home(&format!("~/.ssh/{key}"));
+        let path = oci_arm_catcher_core::expand_home(&format!("~/.ssh/{key}"));
         if path.is_file() {
             // $HOME keeps the line portable; .env parsing expands it.
             println!("SSH_KEY_FILE=\"$HOME/.ssh/{key}\"");

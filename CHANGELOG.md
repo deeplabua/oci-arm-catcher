@@ -1,5 +1,16 @@
 # Changelog
 
+## 0.1.4 — 2026-11-10
+
+- Config reading, request signing and the HTTP client moved to the new
+  [oci-request-signer](https://crates.io/crates/oci-request-signer) crate, shared
+  with oci-free-keeper and oci-free-audit. No change in behaviour.
+- `oci-arm-catcher-core`: the `config`, `signer` and `error` modules are gone;
+  `Profile`, `Client`, `Error` and friends are re-exported from
+  oci-request-signer, the Compute/Identity calls are the `Api` trait, and
+  `connect()` builds the client with the catcher's user agent and
+  `OCI_ARM_CATCHER_ENDPOINT`.
+
 ## 0.1.3 — 2026-10-27
 
 - Update notice: at most once a day the binary checks GitHub for a newer

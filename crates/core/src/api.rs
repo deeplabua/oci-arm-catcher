@@ -4,8 +4,8 @@ use std::collections::BTreeMap;
 
 use serde::{Deserialize, Serialize};
 
-use crate::client::{Client, encode};
-use crate::error::Result;
+use oci_request_signer::Result;
+use oci_request_signer::{Client, encode};
 
 /// The Always Free Ampere shape.
 pub const A1_FLEX: &str = "VM.Standard.A1.Flex";
@@ -126,10 +126,30 @@ pub struct RegionSubscription {
     pub is_home_region: bool,
 }
 
-impl Client {
+/// The OCI calls oci-arm-catcher makes, on top of the signed [`Client`].
+pub trait Api {
     /// `LaunchInstance`. `retry_token` makes a retried request idempotent: OCI returns the
     /// instance from the first attempt instead of creating a second one.
-    pub fn launch_instance(&self, details: &LaunchDetails, retry_token: &str) -> Result<Instance> {
+    fn launch_instance(&self, details: &LaunchDetails, retry_token: &str) -> Result<Instance>;
+
+    /// `ListAvailabilityDomains` for the tenancy.
+    fn availability_domains(&self) -> Result<Vec<AvailabilityDomain>>;
+
+    /// `ListRegionSubscriptions` for the tenancy.
+    fn region_subscriptions(&self) -> Result<Vec<RegionSubscription>>;
+
+    /// The tenancy's home region, if OCI reports one.
+    fn home_region(&self) -> Result<Option<String>>;
+
+    /// `ListSubnets` in a compartment.
+    fn subnets(&self, compartment_id: &str) -> Result<Vec<Subnet>>;
+
+    /// Images for `operating_system` that run on A1.Flex, newest first.
+    fn a1_images(&self, compartment_id: &str, operating_system: &str) -> Result<Vec<Image>>;
+}
+
+impl Api for Client {
+    fn launch_instance(&self, details: &LaunchDetails, retry_token: &str) -> Result<Instance> {
         self.post(
             "iaas",
             &format!("{API}/instances/"),
@@ -138,8 +158,7 @@ impl Client {
         )
     }
 
-    /// `ListAvailabilityDomains` for the tenancy.
-    pub fn availability_domains(&self) -> Result<Vec<AvailabilityDomain>> {
+    fn availability_domains(&self) -> Result<Vec<AvailabilityDomain>> {
         self.get(
             "identity",
             &format!(
@@ -149,16 +168,14 @@ impl Client {
         )
     }
 
-    /// `ListRegionSubscriptions` for the tenancy.
-    pub fn region_subscriptions(&self) -> Result<Vec<RegionSubscription>> {
+    fn region_subscriptions(&self) -> Result<Vec<RegionSubscription>> {
         self.get(
             "identity",
             &format!("{API}/tenancies/{}/regionSubscriptions", self.tenancy()),
         )
     }
 
-    /// The tenancy's home region, if OCI reports one.
-    pub fn home_region(&self) -> Result<Option<String>> {
+    fn home_region(&self) -> Result<Option<String>> {
         Ok(self
             .region_subscriptions()?
             .into_iter()
@@ -166,8 +183,7 @@ impl Client {
             .map(|r| r.region_name))
     }
 
-    /// `ListSubnets` in a compartment.
-    pub fn subnets(&self, compartment_id: &str) -> Result<Vec<Subnet>> {
+    fn subnets(&self, compartment_id: &str) -> Result<Vec<Subnet>> {
         self.get(
             "iaas",
             &format!(
@@ -177,8 +193,7 @@ impl Client {
         )
     }
 
-    /// Images for `operating_system` that run on A1.Flex, newest first.
-    pub fn a1_images(&self, compartment_id: &str, operating_system: &str) -> Result<Vec<Image>> {
+    fn a1_images(&self, compartment_id: &str, operating_system: &str) -> Result<Vec<Image>> {
         self.get(
             "iaas",
             &format!(

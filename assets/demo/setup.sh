@@ -16,7 +16,7 @@ user=ocid1.user.oc1..aaaademo
 fingerprint=12:34:56:78:9a:bc:de:f0:12:34:56:78:9a:bc:de:f0
 tenancy=ocid1.tenancy.oc1..aaaademotenancy
 region=us-ashburn-1
-key_file=$REPO/crates/core/testdata/test-key-pkcs8.pem
+key_file=$DEMO_DIR/test-key-pkcs8.pem
 EOF
 mkdir -p "$WORK/.ssh"
 echo "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAADEMO demo@laptop" > "$WORK/.ssh/id_ed25519.pub"
