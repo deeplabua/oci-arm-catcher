@@ -1,5 +1,13 @@
 # Changelog
 
+## 0.1.5 — 2026-11-10
+
+- oci-request-signer 0.1.1. No change in behaviour; checked against a real tenancy
+  (`check`, `discover`) and the mock (`run`).
+- README: the June 2026 A1 note now cites a measured data point (PAYG tenancy, 4 OCPU /
+  24 GB billed at 0.00, September–November 2026); idle reclamation explained in more
+  detail; how contributions reach the repo.
+
 ## 0.1.4 — 2026-11-10
 
 - Config reading, request signing and the HTTP client moved to the new

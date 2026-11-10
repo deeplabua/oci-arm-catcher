@@ -878,7 +878,7 @@ dependencies = [
 
 [[package]]
 name = "oci-arm-catcher"
-version = "0.1.4"
+version = "0.1.5"
 dependencies = [
  "anyhow",
  "clap",
@@ -892,7 +892,7 @@ dependencies = [
 
 [[package]]
 name = "oci-arm-catcher-core"
-version = "0.1.4"
+version = "0.1.5"
 dependencies = [
  "oci-request-signer",
  "ring",
@@ -902,9 +902,9 @@ dependencies = [
 
 [[package]]
 name = "oci-request-signer"
-version = "0.1.0"
+version = "0.1.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "1201d54b2a36d77db7342984ee9dc1c58231585525018fff0d0391d5d10bb479"
+checksum = "a3728da8d92835badd1d78183a3646158c66829f6bafc5011bc4c9a38e85d424"
 dependencies = [
  "base64 0.22.1",
  "dirs",

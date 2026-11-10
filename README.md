@@ -47,9 +47,12 @@ anywhere: enough for a self-hosted app stack, a game server, or a personal VPN.
 > **Note (June 2026):** Oracle quietly halved the Always Free Ampere allowance
 > from 4 OCPU / 24 GB to **2 OCPU / 12 GB** (1,500 OCPU-hours + 9,000 GB-hours per
 > month) on 15 June 2026, with no announcement. Pay-as-you-go accounts have
-> reportedly kept the old 4 OCPU / 24 GB at no charge, but Oracle hasn't confirmed
-> that publicly — check your own billing before assuming. Set `OCPUS` /
-> `MEMORY_GB` in your `.env` to whatever your account actually allows.
+> reportedly kept the old 4 OCPU / 24 GB at no charge. One data point we checked
+> ourselves: a PAYG tenancy created on 4 June 2026 runs a 4 OCPU / 24 GB A1 instance,
+> and Oracle's Usage API shows it at **0.00 for September, October and November 2026**.
+> Oracle hasn't confirmed this publicly, and newer tenancies may differ — check your
+> own billing (Billing → Cost Analysis) before assuming. Set `OCPUS` / `MEMORY_GB` in
+> your `.env` to whatever your account actually allows.
 
 The catch: those ARM hosts are in heavy demand, so launching an instance very
 often fails with **"Out of host capacity"**. US regions can be dry for hours or
@@ -244,8 +247,13 @@ AVAILABILITY_DOMAINS="Abcd:US-ASHBURN-1-AD-1,Abcd:US-ASHBURN-1-AD-2,Abcd:US-ASHB
 
 Oracle [may reclaim](https://docs.oracle.com/en-us/iaas/Content/FreeTier/freetier_topic-Always_Free_Resources.htm)
 an Always Free instance it considers idle: over 7 days, CPU (95th percentile),
-network **and** memory utilisation all below 20%. After a long hunt, put the
-server to real use — a sleeping instance can be taken back.
+network **and** memory utilisation all below 20% (memory counts for A1 only). One
+metric above 20% is enough to stay safe. After a long hunt, put the server to real
+use — a sleeping instance can be taken back.
+
+The rule is written for Always Free accounts. On the PAYG tenancy above, an A1
+instance that has been "idle" by that definition since June 2026 has not been
+reclaimed — a single observation, not a promise.
 
 The full Always Free compute allowance, for reference: **A1.Flex — 2 OCPU and
 12 GB in total** (one instance, or two smaller ones), plus up to two
@@ -321,7 +329,10 @@ running notification daemon (any desktop environment has one).
 The Rust workspace has two crates: `crates/core` (`oci-arm-catcher-core` — the
 Compute/Identity calls and the retry loop) and `crates/cli` (the `oci-arm-catcher`
 binary). Reading `~/.oci/config`, request signing and the HTTP client live in
-[oci-request-signer](https://github.com/deeplabua/oci-request-signer).
+[oci-request-signer](https://github.com/deeplabua/oci-request-signer)
+([crates.io](https://crates.io/crates/oci-request-signer)), shared with the other
+DeepLab OCI tools. `OCI_ARM_CATCHER_ENDPOINT=http://127.0.0.1:8799` points the binary
+at a local mock (`assets/demo/mock-oci.py`) instead of Oracle.
 
 ```bash
 cargo test
@@ -346,7 +357,8 @@ limits. Provided as-is under the MIT License.
 ## Contributing
 
 Issues and PRs welcome — especially: more OS/notification backends, smarter
-backoff, and region/AD presets.
+backoff, and region/AD presets. Development happens in a private repository;
+accepted PRs are applied there and show up here in the next release commit.
 
 ## Support
 
