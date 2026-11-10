@@ -1,5 +1,15 @@
 # Changelog
 
+## 0.1.6 — 2026-11-10
+
+- README: links to [oci-free-audit](https://github.com/deeplabua/oci-free-audit), the
+  read-only "will Oracle charge me?" check, in the intro and under "Keeping your instance".
+- README: links to [oci-free-keeper](https://github.com/deeplabua/oci-free-keeper), how close an
+  instance is to Oracle's idle rule, in the intro and under "Keeping your instance".
+- README: "Keeping your instance" lists the ways an instance gets lost (idle reclamation, the
+  end of the trial, limit changes, payment or terms problems, terminating it yourself) and what
+  helps (boot volume backups, oci-free-audit, a budget alert).
+
 ## 0.1.5 — 2026-11-10
 
 - oci-request-signer 0.1.1. No change in behaviour; checked against a real tenancy

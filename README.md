@@ -13,7 +13,10 @@ dependency-free binary that retries `LaunchInstance` for the Always Free
 your instance and pings you.
 
 Part of [DeepLab](https://deeplab.tools/products/oci-arm-catcher/) — small, sharp tools that run
-locally.
+locally. Caught your instance? [oci-free-keeper](https://github.com/deeplabua/oci-free-keeper)
+tells you how close it is to being reclaimed as idle, and
+[oci-free-audit](https://github.com/deeplabua/oci-free-audit) checks that it — and the rest of your
+tenancy — stays free.
 
 ![oci-arm-catcher in action: two "Out of host capacity" answers, then the instance is created](assets/demo.gif)
 
@@ -245,15 +248,41 @@ AVAILABILITY_DOMAINS="Abcd:US-ASHBURN-1-AD-1,Abcd:US-ASHBURN-1-AD-2,Abcd:US-ASHB
 
 ## Keeping your instance
 
-Oracle [may reclaim](https://docs.oracle.com/en-us/iaas/Content/FreeTier/freetier_topic-Always_Free_Resources.htm)
-an Always Free instance it considers idle: over 7 days, CPU (95th percentile),
-network **and** memory utilisation all below 20% (memory counts for A1 only). One
-metric above 20% is enough to stay safe. After a long hunt, put the server to real
-use — a sleeping instance can be taken back.
+After a long hunt, the instance is worth protecting. These are the ways people lose one:
 
-The rule is written for Always Free accounts. On the PAYG tenancy above, an A1
-instance that has been "idle" by that definition since June 2026 has not been
-reclaimed — a single observation, not a promise.
+1. **Idle reclamation.** Oracle [may reclaim](https://docs.oracle.com/en-us/iaas/Content/FreeTier/freetier_topic-Always_Free_Resources.htm)
+   an Always Free instance it considers idle: over 7 days, CPU (95th percentile), network
+   **and** memory utilisation all below 20% (memory counts for A1 only). One metric above 20%
+   is enough to stay safe — put the server to real use.
+   [oci-free-keeper](https://github.com/deeplabua/oci-free-keeper) reads 7 days of your
+   instance's metrics and shows which one keeps it safe, or that none does. The rule is written for Always Free
+   accounts: on the PAYG tenancy above, an A1 instance "idle" by that definition since June 2026
+   has not been reclaimed — a single observation, not a promise.
+2. **The free trial ends.** Anything created during the 30-day trial that is *not* Always Free
+   eligible — a bigger shape, A1 beyond the free allowance, extra storage — is stopped when the
+   trial ends and deleted later, unless you upgrade to Pay-As-You-Go. Make sure the instance
+   fits the Always Free limits below before the trial runs out.
+3. **Limits change.** On 15 June 2026 the A1 allowance was halved without notice. On a PAYG
+   account an instance above the allowance is not deleted, it starts costing money.
+4. **Payment or terms problems.** On PAYG, a failed card payment can get the account suspended;
+   any account can be terminated for breaking Oracle's terms (crypto mining is the classic).
+5. **Your own mistake.** Terminating an instance deletes its boot volume unless you choose to
+   keep it.
+
+What helps:
+
+- **Back up the boot volume.** Always Free includes 5 volume backups (boot and block together).
+  A backup survives whatever happens to the instance; you can create a new one from it — and
+  catch capacity for it with this tool again.
+- **Is it idle?** Run [oci-free-keeper](https://github.com/deeplabua/oci-free-keeper): read-only,
+  one line per instance — Safe, Close or At risk against Oracle's idle rule. Exit code 2 means
+  at risk, so it fits in a daily cron job.
+- **Is it still free?** Run [oci-free-audit](https://github.com/deeplabua/oci-free-audit): a
+  read-only check of your tenancy against the Always Free limits and against what Oracle
+  actually billed — A1 size, paid shapes, storage, backups, a budget alert. Exit code 0 means
+  all free, so it fits in cron.
+- **Set a budget alert** (Billing → Budgets, e.g. 1.00 with an email at 100% actual) so a charge
+  reaches you the day it starts, not at the end of the month.
 
 The full Always Free compute allowance, for reference: **A1.Flex — 2 OCPU and
 12 GB in total** (one instance, or two smaller ones), plus up to two
