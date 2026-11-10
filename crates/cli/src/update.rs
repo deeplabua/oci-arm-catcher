@@ -46,12 +46,13 @@ impl UpdateCheck {
         };
         if is_newer(&latest, CURRENT) {
             eprintln!(
-                "\n{}\n  {}\n  {}\n",
+                "\n{}\n  Update: {}\n  {}\n  {}\n",
                 ui::yellow(&format!(
-                    "A new version of oci-arm-catcher is available: {CURRENT} -> {latest}"
+                    "A new version of oci-arm-catcher is available: {CURRENT} → {latest}"
                 )),
-                upgrade_command(&current_exe()),
-                ui::dim(&format!("Release notes: {RELEASES_URL}"))
+                ui::green(&upgrade_command(&current_exe())),
+                ui::dim(&format!("Release notes: {RELEASES_URL}")),
+                ui::dim(&format!("Turn this check off: {OPT_OUT_VAR}=1"))
             );
         }
     }
@@ -148,6 +149,8 @@ fn upgrade_command(exe: &Path) -> String {
     let path = exe.to_string_lossy();
     if path.contains("/Cellar/") || path.contains("/homebrew/") || path.contains("/linuxbrew/") {
         "brew upgrade deeplabua/tap/oci-arm-catcher".to_owned()
+    } else if path.contains("/.cargo/bin/") {
+        "cargo install oci-arm-catcher".to_owned()
     } else if cfg!(windows) {
         "powershell -c \"irm https://github.com/deeplabua/oci-arm-catcher/releases/latest/download/oci-arm-catcher-installer.ps1 | iex\"   (or: cargo install oci-arm-catcher)".to_owned()
     } else {

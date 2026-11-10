@@ -169,9 +169,15 @@ oci-arm-catcher check
 
 ![oci-arm-catcher discover printing ready-to-paste .env lines](assets/discover.gif)
 
+Write your OCIDs into `.env` (read-only — it launches nothing):
+
 ```bash
-oci-arm-catcher discover > .env   # read-only: prints your OCIDs as .env lines
-# review .env (pick a subnet if you have several), then:
+oci-arm-catcher discover > .env
+```
+
+Review `.env` (pick a subnet if you have several), then start the hunt:
+
+```bash
 oci-arm-catcher
 ```
 
@@ -299,14 +305,29 @@ You'll likely want this running for hours. Pick one:
 
 ```bash
 tmux new -s catcher
+```
+
+Inside the session:
+
+```bash
 oci-arm-catcher
-# detach: Ctrl-b then d   ·   reattach: tmux attach -t catcher
+```
+
+Detach with `Ctrl-b` then `d`; come back with:
+
+```bash
+tmux attach -t catcher
 ```
 
 **nohup** — fire and forget, logs to a file:
 
 ```bash
 nohup oci-arm-catcher > catcher.log 2>&1 &
+```
+
+Follow the log:
+
+```bash
 tail -f catcher.log
 ```
 
@@ -365,9 +386,20 @@ at a local mock (`assets/demo/mock-oci.py`) instead of Oracle.
 
 ```bash
 cargo test
+```
+
+```bash
 cargo clippy --workspace --all-targets -- -D warnings
+```
+
+```bash
 cargo fmt --all
-cargo run -- check          # read-only call against your own account
+```
+
+A read-only call against your own account:
+
+```bash
+cargo run -- check
 ```
 
 The README GIFs are recorded with [VHS](https://github.com/charmbracelet/vhs)

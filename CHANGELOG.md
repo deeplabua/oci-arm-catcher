@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.1.7 — 2026-11-10
+
+- Update notice: the upgrade command is highlighted, cargo installs are told to use `cargo install`,
+  and the notice says how to turn the check off.
+- README: one command per code block, so each copies on its own.
+
 ## 0.1.6 — 2026-11-10
 
 - README: links to [oci-free-audit](https://github.com/deeplabua/oci-free-audit), the
