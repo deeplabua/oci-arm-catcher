@@ -3,7 +3,7 @@ members = ["crates/cli", "crates/core"]
 resolver = "3"
 
 [workspace.package]
-version = "0.1.7"
+version = "0.1.8"
 edition = "2024"
 rust-version = "1.92"
 license = "MIT"
@@ -12,7 +12,7 @@ homepage = "https://deeplab.tools"
 
 # Every dependency here must be permissive (MIT/Apache-2.0/BSD/ISC/MPL/Zlib).
 [workspace.dependencies]
-oci-arm-catcher-core = { version = "0.1.7", path = "crates/core" }
+oci-arm-catcher-core = { version = "0.1.8", path = "crates/core" }
 anyhow = "1.0"                                                   # MIT OR Apache-2.0
 clap = { version = "4.6", features = ["derive", "env", "wrap_help"] }  # MIT OR Apache-2.0
 dirs = "6.0"                                                     # MIT OR Apache-2.0

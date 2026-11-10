@@ -1,5 +1,26 @@
 //! `oci-arm-catcher` — grab Oracle Cloud's free ARM capacity the moment it appears.
 
+/// `println!` that exits quietly when stdout is a closed pipe (`… | head -1`),
+/// the way `cat` and `grep` do, instead of panicking. Declared before the modules so it
+/// shadows the std macro everywhere in the binary.
+macro_rules! println {
+    ($($arg:tt)*) => {{
+        use std::io::Write as _;
+        if let Err(e) = writeln!(std::io::stdout(), $($arg)*) {
+            crate::stdout_failed(e);
+        }
+    }};
+}
+
+/// A failed write to stdout: a closed pipe ends the program quietly with 141 (128 + SIGPIPE,
+/// what a shell reports for a tool killed by SIGPIPE); anything else is a real error.
+fn stdout_failed(e: std::io::Error) -> ! {
+    if e.kind() == std::io::ErrorKind::BrokenPipe {
+        std::process::exit(141);
+    }
+    panic!("failed printing to stdout: {e}");
+}
+
 mod args;
 mod exit;
 mod run;
