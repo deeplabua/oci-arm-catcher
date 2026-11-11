@@ -169,12 +169,7 @@ mod tests {
     use oci_request_signer::ApiError;
 
     fn api(status: u16, code: &str, message: &str) -> Error {
-        Error::Api(ApiError {
-            status,
-            code: code.into(),
-            message: message.into(),
-            request_id: None,
-        })
+        Error::Api(ApiError::new(status, code, message))
     }
 
     fn capacity() -> Error {

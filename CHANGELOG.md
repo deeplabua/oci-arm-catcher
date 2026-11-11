@@ -1,5 +1,9 @@
 # Changelog
 
+## 0.1.9 — 2026-11-11
+
+- Built on oci-request-signer 0.2. No change in behaviour.
+
 ## 0.1.8 — 2026-11-10
 
 - Output into a closed pipe (`… | head -1`) ends quietly with exit code 141 instead of a panic.
