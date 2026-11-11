@@ -1,5 +1,10 @@
 # Changelog
 
+## 0.1.10 — 2026-11-11
+
+- `--profile`, `--oci-config` and `--env-file` work before a subcommand too
+  (`oci-arm-catcher --profile WORK check`); launch options given before `run` are kept.
+
 ## 0.1.9 — 2026-11-11
 
 - Built on oci-request-signer 0.2. No change in behaviour.

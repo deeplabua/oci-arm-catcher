@@ -12,11 +12,7 @@ use clap::{Args as ClapArgs, Parser, Subcommand};
 /// Retries LaunchInstance until OCI stops answering "Out of host capacity", then launches your
 /// instance and notifies you. Talks to the OCI API directly: no OCI CLI, no Python.
 #[derive(Debug, Parser)]
-#[command(
-    name = "oci-arm-catcher",
-    version,
-    args_conflicts_with_subcommands = true
-)]
+#[command(name = "oci-arm-catcher", version)]
 pub struct Args {
     #[command(subcommand)]
     pub command: Option<Command>,
@@ -57,6 +53,38 @@ pub struct CommonArgs {
         default_value = "DEFAULT"
     )]
     pub profile: String,
+}
+
+impl LaunchArgs {
+    /// `run`'s options, each one not given after `run` taken from `before` — the options given
+    /// before the subcommand (`oci-arm-catcher --ocpus 2 run`).
+    pub fn or(&self, before: &LaunchArgs) -> LaunchArgs {
+        LaunchArgs {
+            compartment_id: self
+                .compartment_id
+                .clone()
+                .or_else(|| before.compartment_id.clone()),
+            availability_domains: self
+                .availability_domains
+                .clone()
+                .or_else(|| before.availability_domains.clone()),
+            subnet_id: self.subnet_id.clone().or_else(|| before.subnet_id.clone()),
+            image_id: self.image_id.clone().or_else(|| before.image_id.clone()),
+            ssh_key_file: self
+                .ssh_key_file
+                .clone()
+                .or_else(|| before.ssh_key_file.clone()),
+            ocpus: self.ocpus.or(before.ocpus),
+            memory_gb: self.memory_gb.or(before.memory_gb),
+            display_name: self
+                .display_name
+                .clone()
+                .or_else(|| before.display_name.clone()),
+            boot_volume_gb: self.boot_volume_gb.or(before.boot_volume_gb),
+            retry_interval: self.retry_interval.or(before.retry_interval),
+            max_attempts: self.max_attempts.or(before.max_attempts),
+        }
+    }
 }
 
 /// What to launch. Each flag falls back to the variable of the same name in .env.
@@ -116,4 +144,46 @@ pub struct DiscoverArgs {
     /// Compartment to look in [default: COMPARTMENT_ID, else the tenancy].
     #[arg(long, value_name = "OCID")]
     pub compartment_id: Option<String>,
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn global_options_go_before_or_after_the_subcommand() {
+        for argv in [
+            ["oci-arm-catcher", "--profile", "OTHER", "check"],
+            ["oci-arm-catcher", "check", "--profile", "OTHER"],
+        ] {
+            let args = Args::try_parse_from(argv).unwrap();
+            assert!(matches!(args.command, Some(Command::Check)));
+            assert_eq!(args.common.profile, "OTHER");
+        }
+    }
+
+    #[test]
+    fn launch_options_before_run_are_kept() {
+        let args = Args::try_parse_from([
+            "oci-arm-catcher",
+            "--ocpus",
+            "2",
+            "run",
+            "--memory-gb",
+            "12",
+        ])
+        .unwrap();
+        let Some(Command::Run(after)) = &args.command else {
+            panic!("{args:?}")
+        };
+        let launch = after.or(&args.launch);
+        assert_eq!((launch.ocpus, launch.memory_gb), (Some(2.0), Some(12.0)));
+        // After `run` wins.
+        let args = Args::try_parse_from(["oci-arm-catcher", "--ocpus", "2", "run", "--ocpus", "4"])
+            .unwrap();
+        let Some(Command::Run(after)) = &args.command else {
+            panic!("{args:?}")
+        };
+        assert_eq!(after.or(&args.launch).ocpus, Some(4.0));
+    }
 }

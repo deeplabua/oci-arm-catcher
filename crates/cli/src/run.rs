@@ -17,7 +17,13 @@ pub fn run(args: &Args, update: &mut UpdateCheck) -> Result<()> {
     let env_path = env_path.as_deref();
     match &args.command {
         None => catch(&args.launch, &args.common, &env_file, env_path, update),
-        Some(Command::Run(launch)) => catch(launch, &args.common, &env_file, env_path, update),
+        Some(Command::Run(launch)) => catch(
+            &launch.or(&args.launch),
+            &args.common,
+            &env_file,
+            env_path,
+            update,
+        ),
         Some(Command::Check) => check(&args.common),
         Some(Command::Discover(discover)) => self::discover(discover, &args.common, &env_file),
     }
