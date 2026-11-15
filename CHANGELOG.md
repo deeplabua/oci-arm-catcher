@@ -1,5 +1,10 @@
 # Changelog
 
+## 0.1.11 — 2026-11-15
+
+- `.env` values may carry a trailing comment (`IMAGE_ID="ocid1..."  # Oracle Linux`), as
+  `discover` prints them; the comment used to end up in the value (#14).
+
 ## 0.1.10 — 2026-11-11
 
 - `--profile`, `--oci-config` and `--env-file` work before a subcommand too

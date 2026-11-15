@@ -62,13 +62,7 @@ pub fn parse_env(text: &str) -> EnvFile {
         if key.is_empty() || !key.chars().all(|c| c.is_ascii_alphanumeric() || c == '_') {
             continue;
         }
-        let mut value = value.trim();
-        if value.len() >= 2
-            && ((value.starts_with('"') && value.ends_with('"'))
-                || (value.starts_with('\'') && value.ends_with('\'')))
-        {
-            value = &value[1..value.len() - 1];
-        }
+        let value = env_value(value);
         let value = value
             .replace("${HOME}", &home)
             .replace("$HOME", &home)
@@ -76,6 +70,24 @@ pub fn parse_env(text: &str) -> EnvFile {
         vars.insert(key.to_owned(), value);
     }
     vars
+}
+
+/// The value part of a line: quoted up to the closing quote, otherwise up to a ` #` comment.
+/// `discover` writes `IMAGE_ID="ocid1..."  # Oracle Linux ...`, so both forms carry comments.
+fn env_value(raw: &str) -> &str {
+    let raw = raw.trim();
+    for quote in ['"', '\''] {
+        if let Some(rest) = raw.strip_prefix(quote)
+            && let Some(end) = rest.find(quote)
+        {
+            return &rest[..end];
+        }
+    }
+    let end = raw
+        .char_indices()
+        .find(|&(i, c)| c == '#' && (i == 0 || raw[..i].ends_with(char::is_whitespace)))
+        .map_or(raw.len(), |(i, _)| i);
+    raw[..end].trim_end()
 }
 
 fn dirs_home() -> String {
@@ -226,6 +238,25 @@ MEMORY_GB=12
         assert_eq!(vars["C"], "3");
         assert!(!vars.contains_key("D"));
         assert_eq!(vars["E"], format!("{}/x", dirs_home()));
+    }
+
+    #[test]
+    fn trailing_comments_are_not_part_of_the_value() {
+        // As `discover` prints it (issue #14).
+        let vars = parse_env(concat!(
+            "IMAGE_ID=\"ocid1.image.oc1..i\"  # Oracle-Linux-9-aarch64\n",
+            "SUBNET_ID='ocid1.subnet.oc1..s' # public\n",
+            "OCPUS=2 # cores\n",
+            "TAG=a#b\n",
+            "EMPTY= # nothing\n",
+            "HASH=\"x # y\"\n",
+        ));
+        assert_eq!(vars["IMAGE_ID"], "ocid1.image.oc1..i");
+        assert_eq!(vars["SUBNET_ID"], "ocid1.subnet.oc1..s");
+        assert_eq!(vars["OCPUS"], "2");
+        assert_eq!(vars["TAG"], "a#b");
+        assert_eq!(vars["EMPTY"], "");
+        assert_eq!(vars["HASH"], "x # y");
     }
 
     #[test]
